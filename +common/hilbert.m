@@ -10,5 +10,5 @@ function out = hilbert(indata)
         h(n/2+1) = 1;
         h(2:n/2) = 2;
     end
-    out = ifft(freqdomain(:).*h(:));
+    out = transpose(ifft(freqdomain(:).*h(:)));
 end
