@@ -1,4 +1,4 @@
-function [ A, lambda ] = ExpFit( xdata, ydata )
+function [ A, lambda ] = expFit( xdata, ydata )
 %ExpFit y = A e^(λx)の形にフィッティングする．
 %   まず対数を取って線形フィッティングした後，その値を初期値とした非線形フィッティング（fminsearchを使用）を行う．
 p = polyfit( xdata, log(ydata), 1); % 線形フィッティング
