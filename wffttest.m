@@ -9,7 +9,8 @@ xStart = 0e-6;
 xEnd = 10e-6;
 % [Fy, Fx] = common.wfft(y,x,xStart,xEnd,Window="rect");
 % common.wfft(y,x,xStart,xEnd,Window="hann");
-common.wfft(y,x,xStart,xEnd,Window=common.hannFlat(.3));
+% common.wfft(y,x,xStart,xEnd,Window=common.hannFlat(.3));
+common.wfft(y,x,xStart,xEnd,Window=common.gauss(1.0));
 
 % figure(1)
 % plot(Fx,abs(Fy))
