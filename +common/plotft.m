@@ -11,7 +11,7 @@ function [ax1,ax2] = plotft(x,y,windowVect,Fx,Fy)
     
     [px,mx]=common.SIprefix(max(abs(x)));
     [py,my]=common.SIprefix(max(abs(y)));
-    plot(ax1,x/mx,y/my,x/mx,y.*windowVect/my,x/mx,windowVect*max(abs(y))/my);
+    plot(ax1,x/mx,y/my,x/mx,y.*windowVect/my,x/mx,windowVect*max(abs(y.*windowVect))/my);
     xlim(common.niceouter(x(1),x(end))/mx);
     axes(ax1);
     common.myPlotStyle(['Time [',px,'s]'],['Voltage [',py,'V]'],'Time domain');

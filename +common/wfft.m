@@ -51,8 +51,38 @@ function [ Fy, Fx, beforeFFT, windowFun ] = wfft( y,  x, xStart, xEnd, expandPts
 % 
 % ZeroRange --　ゼロ点補正を行うための平均範囲
 % [-inf inf]（既定値） | ベクトル
-%   
-% Desctipri
+%   ゼロ点補正を行うx軸の範囲を指定します．
+% 
+% AmpCompensate -- 振幅補正
+% "on"（既定値） | "off" | logical
+%   FFTの点数で割ることにより，ある成分のFFTの結果を，FFTをかけた範囲の
+%   平均的なその成分の振幅と一致させます．窓関数がrect（方形窓）以外の場合，
+%   窓関数の積分値で補正します．
+% 
+% Complex -- 複素数領域の結果を返す
+% "off"（既定値） | "on" | logical
+%   "on"の場合，フーリエ変換を複素数で返します．この場合，結果には
+%   位相情報も含んだ値になります．
+% 
+% Display -- FFTの結果の表示
+% "off"（既定値） | "on" | logical
+%   "on"を指定した場合，出力引数を設定せずにwfft( ___ )を使用した場合と同様に，結果を
+%   現在のFigureウィンドウに表示します．
+% 
+% Parameters
+% ----------
+% y      : double vector 時間的な信号（波形）
+% x       : double vector waveformの時間軸
+% xStart : 窓関数の左側の端（あるいは特徴点）
+% xEnd   : 窓関数の右側の端（あるいは特徴点）
+% expandPts   : double scalar 0 paddingを行って少なくともexpandPtsの長さになるようにする．
+% 
+% Returns
+% ----------
+% Fx : double/complex vector FFT結果 (振幅のみ，あるいは複素数（オプションによる））
+% Fy : double/complex vector 周波数軸
+% beforeFFT : double vector FFT前の波形．
+% WindowFun : function Handle かけた窓の形状
 
 arguments
     y
@@ -65,9 +95,10 @@ arguments
     options.ZeroRange = [-inf inf];
     options.AmpCompensate logical = true;
     options.Complex logical = false;
-    options.display logical = false;
+    options.Display logical = false;
 end
-
+x = reshape(x,[],1);
+y = reshape(y,[],1);
 if(options.ZeroAdjustment)
     y = y - mean(y(x>=options.ZeroRange(1) & x<=options.ZeroRange(2)));
 end
@@ -95,7 +126,7 @@ if(nargout>=2 || nargout == 0)
     N = numel(beforeFFT);
     Fx = linspace(0,(numel(x)-1)/(x(end)-x(1))*(N-1)/N, N);
 end
-if(nargout == 0)
+if(options.Display || nargout == 0)
     common.plotft(x,y,windowVect,Fx,abs(Fy));
 end
 end
