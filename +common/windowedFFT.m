@@ -1,6 +1,7 @@
 function [ freqdomain, freqvec ] = windowedFFT( timedomain, expandPts, timevec, windowStart, windowEnd  )
 %UNTITLED3 この関数の概要をここに記述
 %   詳細説明をここに記述
+warning('この関数は将来削除される予定です．新しいプログラムを組む際には，common.wfftを使用ください．')
 idxWindowStart = floor( (windowStart - timevec(1) ) / (timevec(2) - timevec(1))) - 10;
 idxWindowEnd   = floor( (windowEnd   - timevec(1) ) / (timevec(2) - timevec(1))) + 10;
 
