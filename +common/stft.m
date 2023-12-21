@@ -10,15 +10,15 @@ function [s,f,t] = stft(waveform,timevec,windowWidth,maxF,options)
 %
 % Description
 % ----------
-% S = stft(waveform,timevec) はtimevecを時間軸にもつ時間信号
+% s = stft(waveform,timevec) はtimevecを時間軸にもつ時間信号
 % waveformの短時間フーリエ変換(STFT)を返します．
 % 
-% S = stft(waveform,timevec,windowWidth) は窓関数幅を指定して短時間フーリエ変換
+% s = stft(waveform,timevec,windowWidth) は窓関数幅を指定して短時間フーリエ変換
 % を行います．窓関数幅を大きくすると周波数解像度を上げることができ，小さくすると
 % 時間解像度を上げることができます．重要なパラメータのため，必ず指定することをおすすめしますが，
 % 指定しない場合，stft関数は窓関数幅を全時間軸の幅の1/100に設定します．
 % 
-% S = stft(waveform,timevec,windowWidth,maxF) は最大周波数を指定して
+% s = stft(waveform,timevec,windowWidth,maxF) は最大周波数を指定して
 % 短時間フーリエ変換を行います．指定しない場合，解析時間が非常に長くなったり， 
 % 目的の周波数範囲を拡大した際に荒い結果になる可能性があります．
 % 
@@ -73,31 +73,31 @@ function [s,f,t] = stft(waveform,timevec,windowWidth,maxF,options)
 % 
 
 arguments
-    waveform double
-    timevec double 
-    windowWidth double = (timevec(end)-timevec(1))/100
-    maxF double = inf;
+    waveform (1,:) {mustBeVector, mustBeNumeric, mustBeNonNan, mustBeFinite}
+    timevec (1,:)  {mustBeVector, mustBeReal,mustBeEqualSize(timevec,waveform)}
+    windowWidth (1,1) {mustBeReal} = (timevec(end)-timevec(1))/100
+    maxF (1,1) {mustBeReal} = inf;
     options.Window {common.mustBeWindowFunction} = common.gauss(1.0);
-    options.divT int32 = 400;
-    options.divF int32 = 400;
-    options.display logical = false;
+    options.DivT int32 {mustBeInteger,mustBePositive} = 400;
+    options.DivF int32 {mustBeInteger,mustBePositive} = 400;
+    options.Display {common.mustBeASwitch} = false;
 end
-
+options.Display = common.tological(options.Display);
 n_windowFun = common.getWindowFunByName(options.Window);
 
-timevec = reshape(timevec,[],1);
-waveform = reshape(waveform,[],1);
+% timevec = reshape(timevec,[],1);
+% waveform = reshape(waveform,[],1);
 if(~isinf( maxF ))
-    expandPts = 1.0/(maxF/options.divF)/((timevec(end)-timevec(1))/(numel(timevec)-1));
+    expandPts = 1.0/(maxF/options.DivF)/((timevec(end)-timevec(1))/(numel(timevec)-1));
 else
     expandPts = 0;
 end
 fftlength = double(max(expandPts,numel(waveform)));
-waveforms = zeros(fftlength,options.divT);
+waveforms = zeros(fftlength,options.DivT);
 
-shiftTime = linspace(timevec(1), timevec(end), options.divT);
+shiftTime = linspace(timevec(1), timevec(end), options.DivT);
 
-for idxShiftT = 1:options.divT
+for idxShiftT = 1:options.DivT
     windowVect = n_windowFun((timevec-shiftTime(idxShiftT))/(windowWidth/2.0));  %windowWidthは窓全体の時間長さ
     integral = sum(windowVect);
     waveforms(1:numel(waveform),idxShiftT) = waveform.*windowVect/integral*2.0;
@@ -110,7 +110,16 @@ f = rawfreqvec(rawfreqvec <= maxF);
 s = rawfreqdomain(1:numel(f),:);
 t = shiftTime;
 
-if(options.display || nargout == 0)
+if(options.Display || nargout == 0)
     common.plotstft(timevec,waveform,t,f,s);
 end
+end
+
+function mustBeEqualSize(a,b)
+    % Test for equal size
+    if ~isequal(size(a),size(b))
+        eid = 'Size:notEqual';
+        msg = 'Size of first input must equal size of second input.';
+        error(eid,msg)
+    end
 end

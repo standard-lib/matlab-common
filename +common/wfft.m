@@ -85,25 +85,33 @@ function [ Fy, Fx, beforeFFT, windowFun ] = wfft( y,  x, xStart, xEnd, expandPts
 % WindowFun : function Handle かけた窓の形状
 
 arguments
-    y
-    x
-    xStart = x(1)
-    xEnd = x(end)
-    expandPts = 0;
+    y (1,:) {mustBeVector, mustBeNumeric, mustBeNonNan, mustBeFinite}
+    x (1,:) {mustBeVector, mustBeReal,mustBeEqualSize(x,y)}
+    xStart (1,1) {mustBeReal} = x(1)
+    xEnd (1,1) {mustBeReal} = x(end)
+    expandPts (1,1) {mustBeInteger, mustBeNonnegative} = 0;
     options.Window {common.mustBeWindowFunction} = 'hann';
-    options.ZeroAdjustment logical = false;
-    options.ZeroRange = [-inf inf];
-    options.AmpCompensate logical = true;
-    options.Complex logical = false;
-    options.Display logical = false;
+    options.ZeroAdjustment {common.mustBeASwitch} = false;
+    options.ZeroRange (1,:) {mustBeReal} = [-inf inf];
+    options.AmpCompensate {common.mustBeASwitch}  = true;
+    options.Complex {common.mustBeASwitch}  = false;
+    options.Display {common.mustBeASwitch}  = false;
 end
-x = reshape(x,[],1);
-y = reshape(y,[],1);
+options.ZeroAdjustment = common.tological(options.ZeroAdjustment);
+options.AmpCompensate  = common.tological(options.AmpCompensate);
+options.Complex        = common.tological(options.Complex);
+options.Display        = common.tological(options.Display);
+options.Window         = common.getWindowFunByName(options.Window);
+% x = reshape(x,[],1);
+% y = reshape(y,[],1);
 if(options.ZeroAdjustment)
+    if(numel(options.ZeroRange)==1)
+        options.ZeroRange = [-inf options.ZeroRange];
+    end
     y = y - mean(y(x>=options.ZeroRange(1) & x<=options.ZeroRange(2)));
 end
 
-n_windowFun = common.getWindowFunByName(options.Window);
+n_windowFun = options.Window;
 windowCenter = (xEnd + xStart ) /2.0;
 windowWidth  = (xEnd - xStart ) /2.0;
 windowFun = @(t) n_windowFun((t-windowCenter)/windowWidth);
@@ -129,4 +137,13 @@ end
 if(options.Display || nargout == 0)
     common.plotft(x,y,windowVect,Fx,abs(Fy));
 end
+end
+
+function mustBeEqualSize(a,b)
+    % Test for equal size
+    if ~isequal(size(a),size(b))
+        eid = 'Size:notEqual';
+        msg = 'Size of first input must equal size of second input.';
+        error(eid,msg)
+    end
 end

@@ -1,6 +1,9 @@
 function [prefix,magnitude] = SIprefix(num)
-%UNTITLED13 Summary of this function goes here
+%SIprefix Summary of this function goes here
 %   Detailed explanation goes here
+arguments
+    num {mustBeNumeric, mustBeReal, mustBeNonzero}
+end
 tbl = {...
     30,'Q';...
     27,'R';...
@@ -25,9 +28,7 @@ tbl = {...
     -30,'q'...
     };
 if(num < 0)
-    [prefix,magnitude] = SIprefix(-num);
-elseif(num == 0)
-    error('no SI prefix (num is 0)');
+    [prefix,magnitude] = common.SIprefix(-num);
 else
     idx = 11-floor(floor(log10(num))/3);
     prefix = tbl{idx,2};
