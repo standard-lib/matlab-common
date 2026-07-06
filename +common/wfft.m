@@ -85,8 +85,8 @@ function [ Fy, Fx, beforeFFT, windowFun ] = wfft( y,  x, xStart, xEnd, expandPts
 % WindowFun : function Handle かけた窓の形状
 
 arguments
-    y (1,:) {mustBeVector, mustBeNumeric, mustBeNonNan, mustBeFinite}
-    x (1,:) {mustBeVector, mustBeReal,mustBeEqualSize(x,y)}
+    y (:,:) {mustBeNumeric, mustBeNonNan, mustBeFinite}
+    x (:,:) {mustBeVector, mustBeReal}
     xStart (1,1) {mustBeReal} = x(1)
     xEnd (1,1) {mustBeReal} = x(end)
     expandPts (1,1) {mustBeInteger, mustBeNonnegative} = 0;
@@ -102,13 +102,26 @@ options.AmpCompensate  = common.tological(options.AmpCompensate);
 options.Complex        = common.tological(options.Complex);
 options.Display        = common.tological(options.Display);
 options.Window         = common.getWindowFunByName(options.Window);
-% x = reshape(x,[],1);
-% y = reshape(y,[],1);
+
+x = reshape(x,[], 1); %列ベクトル化
+
+if(isvector(y))
+    y=reshape(y,[], 1); %列ベクトルにしておく
+elseif(size(y,1) ~= numel(x))
+    error("波形として行列を入力する場合、各波形を列(:,idx)とする行列にしてください。")
+end
+
+if(options.ZeroRange ~= [-inf,inf])
+
 if(options.ZeroAdjustment)
-    if(numel(options.ZeroRange)==1)
+    if(isscalar(options.ZeroRange))
         options.ZeroRange = [-inf options.ZeroRange];
     end
-    y = y - mean(y(x>=options.ZeroRange(1) & x<=options.ZeroRange(2)));
+    timevec_ave_idx = find(x>=options.zeroRange(1) & x<=options.zeroRange(2));
+    assert(~isempty(timevec_ave_idx),...
+        'ゼロ調整用の指定時間範囲 [%.1f, %.1f] \\mus がデータ内に存在しません。処理を中断します。', ...
+        options.ZeroRange(1)*1e6, options.ZeroRange(2)*1e6);
+    y = y - mean(y(timevec_ave_idx,:), 1);
 end
 
 n_windowFun = options.Window;
@@ -118,8 +131,8 @@ windowFun = @(t) n_windowFun((t-windowCenter)/windowWidth);
 
 windowVect = windowFun(x);
 
-beforeFFT = zeros(1, max( numel(y), expandPts) );
-beforeFFT(1:numel(x)) = y.*windowVect;
+beforeFFT = zeros(max( size(y,1), expandPts), size(y, 2));
+beforeFFT(1:numel(x), :) = y.*windowVect;
 
 Fy = fft(beforeFFT);
 
@@ -131,19 +144,10 @@ if(~options.Complex)
     Fy = abs(Fy);
 end
 if(nargout>=2 || nargout == 0)
-    N = numel(beforeFFT);
+    N = size(beforeFFT,1);
     Fx = linspace(0,(numel(x)-1)/(x(end)-x(1))*(N-1)/N, N);
 end
 if(options.Display || nargout == 0)
     common.plotft(x,y,windowVect,Fx,abs(Fy));
 end
-end
-
-function mustBeEqualSize(a,b)
-    % Test for equal size
-    if ~isequal(size(a),size(b))
-        eid = 'Size:notEqual';
-        msg = 'Size of first input must equal size of second input.';
-        error(eid,msg)
-    end
 end

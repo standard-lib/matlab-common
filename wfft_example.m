@@ -2,7 +2,7 @@ close all
 load('test_data\data20231127-113905-trimed.mat');
 xStart = 40e-6;
 xEnd = 52e-6;
-y = waveform1and2;
+y = waveform1and2';
 x = timevec;
 
 % 使い方例 1
@@ -26,4 +26,14 @@ x = timevec;
 % 返り値を指定しない場合，元の波形とフーリエ変換後のFFT結果のプレビューを見れる．
 common.wfft(y,x,xStart,xEnd);
 
-
+% 使い方例 5
+% yとして列ベクトルを束ねた行列を与えて，複数のFFTを一度に行う．
+% 一つずつ行うより遥かに効率が良い．
+ys = repmat(y,[1,10]); %10波形分の設定
+disp(size(ys))
+[Fy, Fx] = common.wfft(ys, x, xStart, xEnd);
+disp(size(Fy))
+figure()
+plot(Fx,Fy(:,1))
+xlim([0 30e6])
+yscale(gca,"log")
