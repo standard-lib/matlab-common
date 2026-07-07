@@ -89,16 +89,17 @@ arguments
     x (:,:) {mustBeVector, mustBeReal}
     xStart (1,1) {mustBeReal} = x(1)
     xEnd (1,1) {mustBeReal} = x(end)
-    expandPts double {mustBeInteger, mustBeScalarOrEmpty} = [];
-    options.window {common.mustBeWindowFunction} = 'hann';
-    options.zeroRange double {mustBeReal} = [];
-    options.ampCompensate {common.mustBeASwitch}  = true;
-    options.complex {common.mustBeASwitch}  = false;
-    options.display {common.mustBeASwitch}  = false;
+    expandPts (1,1) {mustBeInteger, mustBeNonnegative} = 0;
+    options.Window {common.mustBeWindowFunction} = 'hann';
+    options.ZeroRange double {mustBeReal} = [];
+    options.AmpCompensate {common.mustBeASwitch}  = true;
+    options.Complex {common.mustBeASwitch}  = false;
+    options.Display {common.mustBeASwitch}  = false;
 end
-options.ampCompensate  = common.tological(options.ampCompensate);
-options.complex        = common.tological(options.complex);
-options.display        = common.tological(options.display);
+options.AmpCompensate  = common.tological(options.AmpCompensate);
+options.Complex        = common.tological(options.Complex);
+options.Display        = common.tological(options.Display);
+options.Window         = common.getWindowFunByName(options.Window);
 
 x = reshape(x,[], 1); %列ベクトル化
 
@@ -107,8 +108,8 @@ if(isvector(y))
 elseif(size(y,1) ~= numel(x))
     error("波形として行列を入力する場合、各波形を列(:,idx)とする行列にしてください。")
 end
-
-beforeFFT = precondition(y,x,expandPts, options.ZeroRange,[xStart, xEnd], options.window);
+pcond.ZeroRange = optons.ZeroRange
+beforeFFT = precondition(y,x,pcond);
 Fy = fft(beforeFFT);
 
 if(options.AmpCompensate)
@@ -122,7 +123,7 @@ if(nargout>=2 || nargout == 0)
     N = size(beforeFFT,1);
     Fx = linspace(0,(numel(x)-1)/(x(end)-x(1))*(N-1)/N, N);
 end
-if(options.display || nargout == 0)
+if(options.Display || nargout == 0)
     common.plotft(x,y,windowVect,Fx,abs(Fy));
 end
 end
