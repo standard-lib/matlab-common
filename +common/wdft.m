@@ -1,25 +1,25 @@
-function [ Fy, Fx, beforeFFT, windowVect ] = wfft( y,  x, winRange, expandPts, options)
+function [ Fy, beforeDFT, windowVect] = wdft(y, F, x, winRange, options)
 %wfft Fourier transform with window function
 %   
-% Fy = wfft(y, x)
-% Fy = wfft(y, x, winRange)
-% Fy = wfft(y, x, winRange, expandPts)
-% Fy = wfft( ___, Name=Value)
-% [Fy, Fx] = wfft( ___ )
-% [Fy, Fx, beforeFFT] = wfft( ___ )
-% [Fy, Fx, beforeFFT, windowVect] = wfft( ___ )
+% Fy = wdft(y, F, x)
+% Fy = wdft(y, F, x, winRange)
+% Fy = wdft(y, F, x, winRange, expandPts)
+% Fy = wdft( ___, Name=Value)
+% [Fy, Fx] = wdft( ___ )
+% [Fy, Fx, beforeFFT] = wdft( ___ )
+% [Fy, Fx, beforeFFT, windowVect] = wdft( ___ )
 % wfft( ___ )
 % 
 % Description
 % ----------
-% Fy = wfft(y, x)
-% はy全体をフーリエ変換した結果を返します．yとしてベクトルを与えた場合はその
-% フーリエ変換を，n行m列の行列を与えた場合は行方向をn点の波形と扱い，
-% 波形がm個ある波形の集団と扱います．関数はm回分のfftを行った結果を返します．
+% Fy = wdft(y, F, x)
+% y全体の周波数Fの成分を返します．窓は掛けません．yとしてベクトルを与えた場合は１個の結果を返します．
+% n行m列の行列を与えた場合は行方向をn点の波形と扱い，波形がm個ある波形の集団と扱います．
+% 関数はm回分のwdftを行った結果を返します．Fはスカラーでなければなりません．
 % 
-% Fy = wfft(y, x, [xStart, xEnd]) はxの軸のxStartからxEndの範囲に対して対応するyをフーリエ変換します．
+% Fy = wfft(y, F, x, [xStart, xEnd]) はxの軸のxStartからxEndの範囲に対して対応するyをフーリエ変換します．
 % 
-% Fy = wfft(y, x, [xStart, xEnd], expandPts) はexpandPtsがyの大きさよりも大きい場合，
+% Fy = wfft(y, F, x, [xStart, xEnd], expandPts) はexpandPtsがyの大きさよりも大きい場合，
 % expandPtsまで0を追加してフーリエ変換を行います．
 % 
 % Fy = wfft( ___, Name=Value) は，名前と値の引数を使用して追加オプションを指定します．
@@ -35,7 +35,7 @@ function [ Fy, Fx, beforeFFT, windowVect ] = wfft( y,  x, winRange, expandPts, o
 % 
 % 出力引数を設定せずにwfft( ___ )を使用すると，現在のFigureウィンドウに， 
 % 変換前の時間波形とフーリエ変換結果を並べて表示します．この方法は，
-% 結果を最初に確認するのに向いています． 下記
+% 結果を最初に確認するのに向いています． 下記に示すようにDisplayをOnにしても同じ結果が得られます．
 % 
 % Options (名前と値の引数）
 %   オプションの引数のペアを Name1=Value1,...,NameN=ValueN として指定します。
@@ -48,27 +48,23 @@ function [ Fy, Fx, beforeFFT, windowVect ] = wfft( y,  x, winRange, expandPts, o
 %   規格化された窓関数の関数ハンドルを渡してください．利用可能なウィンドウのリストは
 %   別途参照して下さい．MatlabのSignal Processing Toolsが提供するウィンドウは使えませんので，注意ください．
 % 
-% ZeroAdjustment -- ゼロ点補正
-% "off"（既定値） | "on" | logical
-%   ゼロ点補正を行う場合"on"を指定します．デフォルトでは波形全体の平均を波形から引きますが，
-%   ZeroRangeオプションを設定することで，平均をとる時間範囲を設定できます．
-% 
-% ZeroRange --　ゼロ点補正を行うための平均範囲
-% [-inf inf]（既定値） | ベクトル
+% zeroRange --　ゼロ点補正を行うための平均範囲
+% []（既定値） | ベクトル
 %   ゼロ点補正を行うx軸の範囲を指定します．
+%   ZeroRangeオプションを設定することで，平均をとる時間範囲を設定できます．指定しない場合は零点補正を行いません．
 % 
-% AmpCompensate -- 振幅補正
+% ampCompensate -- 振幅補正
 % "on"（既定値） | "off" | logical
 %   FFTの点数で割ることにより，ある成分のFFTの結果を，FFTをかけた範囲の
 %   平均的なその成分の振幅と一致させます．窓関数がrect（方形窓）以外の場合，
 %   窓関数の積分値で補正します．
 % 
-% Complex -- 複素数領域の結果を返す
+% complex -- 複素数領域の結果を返す
 % "off"（既定値） | "on" | logical
 %   "on"の場合，フーリエ変換を複素数で返します．この場合，結果には
 %   位相情報も含んだ値になります．
 % 
-% Display -- FFTの結果の表示
+% display -- FFTの結果の表示
 % "off"（既定値） | "on" | logical
 %   "on"を指定した場合，出力引数を設定せずにwfft( ___ )を使用した場合と同様に，結果を
 %   現在のFigureウィンドウに表示します．
@@ -90,6 +86,7 @@ function [ Fy, Fx, beforeFFT, windowVect ] = wfft( y,  x, winRange, expandPts, o
 
 arguments
     y (:,:) {mustBeNumeric, mustBeNonNan, mustBeFinite}
+    F (1,1) {mustBeReal, mustBeNonNan, mustBeFinite}
     x (:,:) {mustBeVector, mustBeReal}
     winRange (1,2) {mustBeReal} = [x(1),x(end)];
     expandPts double {mustBeInteger, mustBeScalarOrEmpty} = [];
@@ -111,8 +108,9 @@ elseif(size(y,1) ~= numel(x))
     error("波形として行列を入力する場合、各波形を列(:,idx)とする行列にしてください。")
 end
 
-[beforeFFT,windowVect] = common.precondition(y,x,expandPts, options.zeroRange,winRange, options.window);
-Fy = fft(beforeFFT);
+[beforeDFT,windowVect] = common.precondition(y,x,expandPts, options.zeroRange,winRange, options.window);
+%DFT計算
+Fy = beforeDFT.*(exp(-2i*pi*F*x));
 
 if(options.ampCompensate)
     integral = sum(windowVect);
@@ -120,10 +118,6 @@ if(options.ampCompensate)
 end
 if(~options.complex)
     Fy = abs(Fy);
-end
-if(nargout>=2 || nargout == 0)
-    N = size(beforeFFT,1);
-    Fx = linspace(0,(numel(x)-1)/(x(end)-x(1))*(N-1)/N, N);
 end
 if(options.display || nargout == 0)
     common.plotft(x,y,windowVect,Fx,abs(Fy));

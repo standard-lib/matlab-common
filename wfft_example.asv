@@ -41,7 +41,4 @@ yscale(gca,"log")
 % 使い方例 6
 % 必要な周波数が一つだけのとき，すなわち特定の周波数の振幅のみが知りたいとき
 % 全周波数ビンを計算するFT（O(N log N)）よりも，FTのSumを一つだけ行うほうが当然速い（O(N)）
-F0 = 5e6;
-[Fy] = common.wdft(ys, F0, x, [xStart, xEnd]);
-hold on
-plot(F0, Fy, '*')
+[Fy] = 
