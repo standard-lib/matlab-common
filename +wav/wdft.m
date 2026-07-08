@@ -89,7 +89,6 @@ arguments
     F (1,1) {mustBeReal, mustBeNonNan, mustBeFinite}
     x (:,:) {mustBeVector, mustBeReal}
     winRange (1,2) {mustBeReal} = [x(1),x(end)];
-    expandPts double {mustBeInteger, mustBeScalarOrEmpty} = [];
     options.window {common.mustBeWindowFunction} = 'hann';
     options.zeroRange double {mustBeReal} = [];
     options.ampCompensate {common.mustBeASwitch}  = true;
@@ -108,9 +107,9 @@ elseif(size(y,1) ~= numel(x))
     error("波形として行列を入力する場合、各波形を列(:,idx)とする行列にしてください。")
 end
 
-[beforeDFT,windowVect] = common.precondition(y,x,expandPts, options.zeroRange,winRange, options.window);
+[beforeDFT,windowVect] = common.precondition(y,x,0, options.zeroRange,winRange, options.window);
 %DFT計算
-Fy = beforeDFT.*(exp(-2i*pi*F*x));
+Fy = (exp(-2i*pi*F*x'))*beforeDFT;
 
 if(options.ampCompensate)
     integral = sum(windowVect);
