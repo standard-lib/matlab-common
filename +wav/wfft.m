@@ -89,7 +89,7 @@ arguments
     x (:,:) {mustBeVector, mustBeReal}
     winRange (1,2) {mustBeReal} = [x(1),x(end)];
     expandPts double {mustBeInteger, mustBeScalarOrEmpty} = [];
-    options.window {common.mustBeWindowFunction} = 'hann';
+    options.window {wav.mustBeWindowFunction} = 'hann';
     options.zeroRange double {mustBeReal} = [];
     options.ampCompensate {common.mustBeASwitch}  = true;
     options.complex {common.mustBeASwitch}  = false;
@@ -107,7 +107,7 @@ elseif(size(y,1) ~= numel(x))
     error("波形として行列を入力する場合、各波形を列(:,idx)とする行列にしてください。")
 end
 
-[beforeFFT,windowVect] = common.precondition(y,x,expandPts, options.zeroRange,winRange, options.window);
+[beforeFFT,windowVect] = wav.precondition(y,x,expandPts, options.zeroRange,winRange, options.window);
 Fy = fft(beforeFFT);
 
 if(options.ampCompensate)
@@ -122,6 +122,6 @@ if(nargout>=2 || nargout == 0)
     Fx = linspace(0,(numel(x)-1)/(x(end)-x(1))*(N-1)/N, N);
 end
 if(options.display || nargout == 0)
-    common.plotft(x,y,windowVect,Fx,abs(Fy));
+    wav.plotft(x,y,windowVect,Fx,abs(Fy));
 end
 end

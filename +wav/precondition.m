@@ -7,7 +7,7 @@ arguments (Input)
     expandPts double {mustBeScalarOrEmpty, mustBeInteger}
     zeroRange double {mustBeReal}
     windowRange double;
-    window  {common.mustBeWindowFunction};
+    window  {wav.mustBeWindowFunction};
 end
 
 arguments (Output)
@@ -15,7 +15,7 @@ arguments (Output)
     windowVect
 end
 
-window = common.getWindowFunByName(window);
+window = wav.getWindowFunByName(window);
 
 if(~isempty(zeroRange))
     if(isscalar(zeroRange))

@@ -9,9 +9,9 @@ if(ischar(window))
 end
 if(isstring(window))
     if(strcmpi(window,hannWindowStr))
-        n_windowFun = common.hann();
+        n_windowFun = wav.hann();
     elseif(strcmpi(window,rectWindowStr))
-        n_windowFun = common.rect();
+        n_windowFun = wav.rect();
     end
 else
     n_windowFun = window;
