@@ -1,7 +1,7 @@
-function [ABS, ARG, Re, Im] = compci(mu, cov, conf)
+function [ABS, ARG, Re, Im] = compci_old(mu, cov, conf)
 %COMPCI 複素数の信頼区間を計算する(Nが十分に大きいときのみ有効）
 %   mu: 平均値（スカラー複素数）
-%   cov: 共分散行列
+%   cov: 不偏共分散/Nの標準誤差に相当する分散
 %   conf:信頼係数
 
     mulist = mu;
@@ -33,7 +33,7 @@ function [ABS, ARG, Re, Im] = compci(mu, cov, conf)
         cov = covcell{idxPts};
         [P, lambda] = eig(cov);
         k = sqrt(invcdf(conf, @(x) chi2(x,2), 0));
-        
+
         v = @(theta) k*[cos(theta), sin(theta)]*sqrt(lambda)*P';
         pv = @(theta) v(theta) + mvec;
         dpv = @(theta) [-sin(theta), cos(theta)]*sqrt(lambda)*P';
